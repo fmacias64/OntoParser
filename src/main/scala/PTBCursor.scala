@@ -37,9 +37,10 @@ class PTBCursor(trees: List[PTBNode]) {
       // Ignore it
     }
     else if (pos.index < currentSentenceTokens.length) {
-      var expectToken = currentSentenceTokens(pos.index)
+      var expectToken = currentSentenceTokens(pos.index).replaceAll("&","-AMP-")
       while (expectToken != token && (expectToken.startsWith("*") || expectToken.startsWith("0") || expectToken.equals("\""))) {
         incrementIndex()
+        if (pos.index == currentSentenceTokens.length) consumeLine()
         expectToken = currentSentenceTokens(pos.index)
       }
       if (expectToken != token) System.err.println("Cursor error! Sentence: "+pos.sentence+" index: "+pos.index+" expecting: "+expectToken+" got: "+token)
