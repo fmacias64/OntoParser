@@ -11,8 +11,12 @@ object FileUtils {
     these ++ these.filter(_.isDirectory).flatMap(recursivelyListFiles)
   }
 
-  def recursivelyListFilePrefixes(f : String): Array[String] = {
-    recursivelyListFiles(new File(f)).map(f => f.getAbsolutePath.split(".")(0)).distinct
+  def recursivelyListFilePrefixes(f : String, suffixes : List[String]): Array[String] = {
+    recursivelyListFiles(new File(f)).
+      filter(f => f.getAbsolutePath.lastIndexOf(".") != -1).
+      filter(f => (suffixes.length == 0) || suffixes.contains(f.getAbsolutePath.substring(f.getAbsolutePath.lastIndexOf(".")+1))).
+      map(f => f.getAbsolutePath.substring(0,f.getAbsolutePath.lastIndexOf("."))).
+      distinct
   }
 }
 

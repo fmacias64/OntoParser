@@ -21,6 +21,19 @@ object PTBTreeUtils {
     list.toList
   }
 
+  def specifiedSubtree(tree: PTBNode, mapping: (Integer, Integer)): PTBNode = {
+    specifiedSubtree(tree, mapping._1, mapping._2)
+  }
+
+  def specifiedSubtree(tree: PTBNode, startIndex: Integer, parents: Integer): PTBNode = {
+    getParent(getAllSubtrees(List(tree),false)(startIndex),parents)
+  }
+
+  def getParent(node: PTBNode, parents: Integer): PTBNode = {
+    if ((parents > 0) && node.parent != null) getParent(node.parent, parents-1)
+    else node
+  }
+
   def flatten(tree: PTBNode): String = {
     tree match {
       case PTBNonTerminal(l,c) => c.map(flatten).mkString(" ")

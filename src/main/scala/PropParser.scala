@@ -13,20 +13,21 @@ nw/wsj/00/wsj_0020@0020@wsj@nw@en@on 1 39 gold announce-v announce.01 ----- 39:0
 
  */
 
-case class NTuple(senses: List[String], args: List[NTupleArg])
+case class NTuple(senses: List[String], args: List[NTupleArg], sentenceNum: Integer)
 case class NTupleArg(rel: String, mapping: List[(Integer,Integer)])
 
 object PropParser extends RegexParsers {
-  def props: Parser[List[NTuple]] = prop.+
-  def prop: Parser[NTuple] = "[^ ]+".r ~ "[0-9]+".r ~ "[0-9]+".r ~ "gold" ~ "[^ ]+".r.+ ~ "-----" ~ args ^^ {
-    case source~sentenceNum~rootWord~"gold"~senses~"-----"~args => NTuple(senses, args)
+  override val whiteSpace = "[ \t]+".r
+  def props: Parser[List[NTuple]] = (prop<~"\n".?).+
+  def prop: Parser[NTuple] = "[^ ]+".r ~ "[0-9]+".r ~ "[0-9]+".r ~ "gold" ~ "[^ ]+".r.filter(s => s != "-----").+ ~ "-----" ~ args ^^ {
+    case source~sentenceNum~rootWord~"gold"~senses~"-----"~args => NTuple(senses, args, Integer.parseInt(sentenceNum))
   }
   def args: Parser[List[NTupleArg]] = arg.+
-  def arg: Parser[NTupleArg] = ranges~"-"~"[^ ]+".r ^^ {
+  def arg: Parser[NTupleArg] = ranges~"-"~"[^ \n]+".r ^^ {
     case ranges~"-"~rel => NTupleArg(rel,ranges)
   }
   // Lists of ranges are strung together when we have null elements inserted into the parse
-  def ranges: Parser[List[(Integer,Integer)]] = (range<~"*".?).+
+  def ranges: Parser[List[(Integer,Integer)]] = ("[^0-9]".r.? ~> range).+
   // First number is start word, second number is how many steps up the tree to take before you take the whole lot
   def range: Parser[(Integer,Integer)] = "[0-9]+:[0-9]+".r ^^ {
     s =>
