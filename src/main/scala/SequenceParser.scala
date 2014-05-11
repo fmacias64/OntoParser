@@ -1,26 +1,26 @@
 import scala.xml.XML
 
 abstract class TagData()
-case class TagSequence[T <: TagData](startSentence: Integer, startIndex: Integer, endSentence: Integer, endIndex: Integer, data : T)
+case class TagSequence(startSentence: Integer, startIndex: Integer, endSentence: Integer, endIndex: Integer, data : TagData)
 
 /**
  * Created by Keenon on 5/10/14.
  */
-abstract class SequenceParser[T <: TagData] {
+abstract class SequenceParser {
 
   case class SentenceIndex(sentence: Integer, index: Integer)
 
-  def parse(path : String) : List[TagSequence[T]] = {
+  def parse(path : String) : List[TagSequence] = {
     unwindMentions(SentenceIndex(0,-1),XML.loadFile(path))._1
   }
 
-  def getData(node: xml.Elem): T
+  def getData(node: xml.Elem): TagData
 
   def dataLabel: String
 
-  def unwindMentions(startPos: SentenceIndex, node: xml.Elem) : (List[TagSequence[T]], SentenceIndex) = {
+  def unwindMentions(startPos: SentenceIndex, node: xml.Elem) : (List[TagSequence], SentenceIndex) = {
 
-    val recurse = node.child.foldLeft(List[TagSequence[T]](),startPos){
+    val recurse = node.child.foldLeft(List[TagSequence](),startPos){
 
       // Recurse when we find elements that are non-terminal
 
