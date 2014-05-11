@@ -37,7 +37,7 @@ class PTBCursor(trees: List[PTBNode]) {
       // Ignore it
     }
     else if (pos.index < currentSentenceTokens.length) {
-      var expectToken = currentSentenceTokens(pos.index).replaceAll("&","-AMP-")
+      var expectToken = currentSentenceTokens(pos.index).replaceAll("\\&","-AMP-").replaceAll(">","-RAB-").replaceAll("<","-LAB-")
       while (expectToken != token && (expectToken.startsWith("*") || expectToken.startsWith("0") || expectToken.equals("\""))) {
         incrementIndex()
         if (pos.index == currentSentenceTokens.length) consumeLine()
