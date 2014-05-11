@@ -4,6 +4,11 @@ import scala.collection.mutable._
  * Created by Keenon on 5/9/14.
  */
 object PTBTreeUtils {
+
+  def getTerminalList(tree: PTBNode, start: Integer, length: Integer) {
+    getAllSubtrees(List(tree),false).slice(start, start+length)
+  }
+
   def getAllSubtrees(trees : List[PTBNode], includeNonTerminals : Boolean): List[PTBNode] = {
     val list : MutableList[PTBNode] = new MutableList[PTBNode]()
     trees.foreach {

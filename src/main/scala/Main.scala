@@ -24,38 +24,9 @@ object Main {
 
     val mongoClient = MongoClient("localhost", 27017)
 
-    //val path = "/Users/keenon/Desktop/ontonotes/data/english/annotations/nw/wsj"
     val path = "/Users/keenon/Desktop/ontonotes/data/english/annotations"
-    val ptbs : Array[PTBNode] = FileUtils.recursivelyListFiles(FileUtils.openFile(path)).filter(
-      f => f.getName.endsWith(".parse")
-    ).flatMap(f =>
-      {
-        val sr = StreamReader(new InputStreamReader(new FileInputStream(f)))
-        println("Parsing "+f.getPath)
-        PTBParser.parseAll(PTBParser.trees,sr).get
-      }
-    )
+    OntoParser.parse(FileUtils.recursivelyListFilePrefixes(path)(0))
 
-    // val terminals = PTBTreeUtils.getAllSubtrees(ptbs.toList,false).asInstanceOf[List[PTBTerminal]]
-    val nonTerminals = PTBTreeUtils.getAllSubtrees(ptbs.toList,true)
-
-    val comparatives : List[String] = nonTerminals.filter(p => List("JJR","JJS","RBR","RBS").contains(p.l)).map(PTBTreeUtils.flatten)
-    println("-----------\nCOMPARATIVES\n-----------")
-    analyze(comparatives)
-
-    val determiners : List[String] = nonTerminals.filter(p => List("DT").contains(p.l)).map(PTBTreeUtils.flatten)
-    println("-----------\nDETERMINERS\n-----------")
-    analyze(determiners)
-
-    val modals : List[String] = nonTerminals.filter(p => List("MD").contains(p.l)).map(PTBTreeUtils.flatten)
-    println("-----------\nMODALS\n-----------")
-    analyze(modals)
-
-    val prepositions : List[String] = nonTerminals.filter(p => List("TO", "IN").contains(p.l)).map(PTBTreeUtils.flatten)
-    println("-----------\nPREPOSITIONS\n-----------")
-    analyze(prepositions)
-
-    println("Sentences: "+ptbs.length)
   }
 }
 
