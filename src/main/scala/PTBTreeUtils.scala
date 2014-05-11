@@ -27,8 +27,6 @@ object PTBTreeUtils {
       val terminals = getAllSubtrees(List(s),false)
       val fromIndex : Int = if (trees.indexOf(s) == startSentence) startIndex else 0
       val toIndex : Int = if (trees.indexOf(s) == endSentence) endIndex+1 else terminals.length
-      println("Sentence: "+flatten(s))
-      println("Slice from "+fromIndex+" to "+toIndex+" out of "+terminals.length+" yielded "+terminals.slice(fromIndex,toIndex).length)
       terminals.slice(fromIndex,toIndex)
     })
   }

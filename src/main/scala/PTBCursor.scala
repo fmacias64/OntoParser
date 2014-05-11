@@ -5,36 +5,46 @@
 case class SentenceIndex(sentence: Int, index: Int)
 
 class PTBCursor(trees: List[PTBNode]) {
-  var currentSentenceIndex : Int = 0
-  var currentWithinSentenceIndex : Int = 0
+  var pos : SentenceIndex = SentenceIndex(0,0)
   var currentSentenceTokens : List[String] = getCurrentSentenceTokens
 
-  def index : SentenceIndex = SentenceIndex(currentSentenceIndex,currentWithinSentenceIndex)
-  def getCurrentSentenceTokens : List[String] = PTBTreeUtils.getAllSubtrees(List(trees(currentSentenceIndex)),false).map(t => t match { case m : PTBTerminal => m.token })
+  def getCurrentSentenceTokens : List[String] = if (pos.sentence < trees.length) PTBTreeUtils.getAllSubtrees(List(trees(pos.sentence)),false).map(t => t match { case m : PTBTerminal => m.token }) else List()
 
   def incrementIndex() {
-    currentWithinSentenceIndex += 1
-    if (currentWithinSentenceIndex >= currentSentenceTokens.length) {
-      currentSentenceIndex += 1
-      currentWithinSentenceIndex = 0
+    pos = SentenceIndex(pos.sentence,pos.index+1)
+  }
+
+  def consumeLine() {
+    if (pos.index == currentSentenceTokens.length) {
+      pos = SentenceIndex(pos.sentence+1,0)
       currentSentenceTokens = getCurrentSentenceTokens
     }
   }
 
-  var lastExpect : String = ""
-  var lastConsume : String = ""
-
   def consumeToken(token : String) {
-    var expectToken = currentSentenceTokens(currentWithinSentenceIndex)
-    while (expectToken != token && (expectToken.startsWith("*") || expectToken.startsWith("0"))) {
-      incrementIndex()
-      expectToken = currentSentenceTokens(currentWithinSentenceIndex)
+    if (token.contains("\n")) {
+      var subtoken = token
+      while (subtoken.contains("\n")) {
+        subtoken.substring(0,subtoken.indexOf("\n")).split(" ").filter(!_.contains("\n")).map(consumeToken)
+        subtoken = subtoken.substring(subtoken.indexOf("\n")+1)
+        consumeLine()
+      }
+      subtoken.split(" ").map(st => {
+        consumeToken(st)
+      })
     }
-    if (expectToken != token) println("Cursor error! Sentence: "+currentSentenceIndex+" index: "+currentWithinSentenceIndex+" expecting: "+expectToken+" got: "+token+"\nlast expect: "+lastExpect+" last got: "+lastConsume)
+    else if (token.trim.length == 0) {
+      // Ignore it
+    }
+    else if (pos.index < currentSentenceTokens.length) {
+      var expectToken = currentSentenceTokens(pos.index)
+      while (expectToken != token && (expectToken.startsWith("*") || expectToken.startsWith("0") || expectToken.equals("\""))) {
+        incrementIndex()
+        expectToken = currentSentenceTokens(pos.index)
+      }
+      if (expectToken != token) System.err.println("Cursor error! Sentence: "+pos.sentence+" index: "+pos.index+" expecting: "+expectToken+" got: "+token)
 
-    lastExpect = expectToken
-    lastConsume = token
-
-    incrementIndex()
+      incrementIndex()
+    }
   }
 }

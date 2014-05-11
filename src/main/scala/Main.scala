@@ -35,7 +35,8 @@ object Main {
 
     val path = "/Users/keenon/Desktop/ontonotes/data/english/annotations"
     val filePrefixes = FileUtils.recursivelyListFilePrefixes(path,List("prop","parse"))
-    if (filePrefixes.length > 0) OntoParser.insert(filePrefixes(0),docbank)
+    //OntoParser.insert(filePrefixes(0),docbank)
+    filePrefixes.foreach(OntoParser.insert(_,docbank))
 
     mongoClient.close()
 

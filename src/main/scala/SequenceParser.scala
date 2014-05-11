@@ -1,3 +1,4 @@
+import scala.io.Source
 import scala.xml.XML
 
 abstract class TagData()
@@ -9,6 +10,7 @@ case class TagSequence(startSentence: Int, startIndex: Int, endSentence: Int, en
 abstract class SequenceParser {
 
   def parse(path : String, trees : List[PTBNode]) : List[TagSequence] = {
+    val file = Source.fromFile(path).getLines().map(_.replaceAll(" \" ","")).mkString("\n")
     unwindMentions(new PTBCursor(trees),XML.loadFile(path))
   }
 
@@ -16,9 +18,9 @@ abstract class SequenceParser {
 
   def dataLabel: String
 
-  def unwindMentions(cursor: PTBCursor, node: xml.Elem) : List[TagSequence] = {
+  def unwindMentions(cursor: PTBCursor, node: xml.Node) : List[TagSequence] = {
 
-    val startPos = cursor.index
+    val startPos = cursor.pos
 
     val recurse = node.child.foldLeft(List[TagSequence]()) {
 
@@ -30,21 +32,17 @@ abstract class SequenceParser {
 
       // Consume text input when we reach it, advancing our index appropriately
 
-      case (corefs, child: xml.Node) if child.text == child.toString => {
+      case (corefs, child) => {
 
         // Move the position appropriately when we come to a string
 
-        child.toString().split("[ \n]").filter(s => s.trim.length > 0).foreach(cursor.consumeToken)
+        child.text.split(" ").foreach(cursor.consumeToken)
 
         corefs
       }
-
-      // Catch all other cases, like null node
-
-      case (status, node) => status
     }
 
-    val endPos = cursor.index
+    val endPos = cursor.pos
 
     node match {
       case x : xml.Elem if x.label == dataLabel => {
