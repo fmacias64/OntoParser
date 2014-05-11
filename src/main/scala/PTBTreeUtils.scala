@@ -5,7 +5,7 @@ import scala.collection.mutable._
  */
 object PTBTreeUtils {
 
-  def getTerminalList(tree: PTBNode, start: Integer, length: Integer) {
+  def getTerminalList(tree: PTBNode, start: Int, length: Int) {
     getAllSubtrees(List(tree),false).slice(start, start+length)
   }
 
@@ -21,15 +21,33 @@ object PTBTreeUtils {
     list.toList
   }
 
-  def specifiedSubtree(tree: PTBNode, mapping: (Integer, Integer)): PTBNode = {
-    specifiedSubtree(tree, mapping._1, mapping._2)
+  def getAllInterveningTokens(trees : List[PTBNode], startSentence : Int, startIndex : Int, endSentence : Int, endIndex : Int): List[PTBNode] = {
+    val sentences = trees.slice(startSentence,endSentence+1)
+    sentences.flatMap(s => {
+      val terminals = getAllSubtrees(List(s),false)
+      val fromIndex : Int = if (trees.indexOf(s) == startSentence) startIndex else 0
+      val toIndex : Int = if (trees.indexOf(s) == endSentence) endIndex+1 else terminals.length
+      println("Sentence: "+flatten(s))
+      println("Slice from "+fromIndex+" to "+toIndex+" out of "+terminals.length+" yielded "+terminals.slice(fromIndex,toIndex).length)
+      terminals.slice(fromIndex,toIndex)
+    })
   }
 
-  def specifiedSubtree(tree: PTBNode, startIndex: Integer, parents: Integer): PTBNode = {
+  def concatTerminals(terminals : List[PTBNode]) : String = {
+    terminals.map {
+      case t: PTBTerminal => t.token.toString
+    }.mkString(" ")
+  }
+
+  def specifiedSubtree(tree: PTBNode, mapping: IndexAncestor): PTBNode = {
+    specifiedSubtree(tree, mapping.index, mapping.ancestor)
+  }
+
+  def specifiedSubtree(tree: PTBNode, startIndex: Int, parents: Int): PTBNode = {
     getParent(getAllSubtrees(List(tree),false)(startIndex),parents)
   }
 
-  def getParent(node: PTBNode, parents: Integer): PTBNode = {
+  def getParent(node: PTBNode, parents: Int): PTBNode = {
     if ((parents > 0) && node.parent != null) getParent(node.parent, parents-1)
     else node
   }
@@ -38,6 +56,13 @@ object PTBTreeUtils {
     tree match {
       case PTBNonTerminal(l,c) => c.map(flatten).mkString(" ")
       case PTBTerminal(l,t) => t
+    }
+  }
+
+  def cleanFlatten(tree: PTBNode): String = {
+    tree match {
+      case PTBNonTerminal(l,c) => c.map(cleanFlatten).mkString(" ")
+      case PTBTerminal(l,t) => if (t.startsWith("*")) "" else t
     }
   }
 }

@@ -29,8 +29,8 @@ object OntoParser {
 
       val trees : List[PTBNode] = PTBParser.parseAll(PTBParser.trees,parseSr).get
       val props : List[NTuple] = PropParser.parseAll(PropParser.props,propSr).get
-      val corefChains : List[TagSequence] = CorefParser.parse(path+".coref")
-      val names : List[TagSequence] = NameParser.parse(path+".name")
+      val corefChains : List[TagSequence] = CorefParser.parse(path+".coref",trees)
+      val names : List[TagSequence] = NameParser.parse(path+".name",trees)
 
       println("CorefChains: "+corefChains.length)
       println(corefChains(0))
@@ -38,8 +38,11 @@ object OntoParser {
 
       println("Names: "+names.length)
       println(names(0))
+      println(PTBTreeUtils.concatTerminals(PTBTreeUtils.getAllInterveningTokens(trees,names(0).startSentence,names(0).startIndex,names(0).endSentence,names(0).endIndex)))
 
-      MongoInterface.createDocument(docbank,documentIndex,trees,props,corefChains ++ names)
+      println("Trees: "+trees.length)
+
+      //MongoInterface.createDocument(docbank,documentIndex,trees,props,corefChains ++ names)
     }
   }
 }

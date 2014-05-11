@@ -14,7 +14,8 @@ nw/wsj/00/wsj_0020@0020@wsj@nw@en@on 1 39 gold announce-v announce.01 ----- 39:0
  */
 
 case class NTuple(senses: List[String], args: List[NTupleArg], sentenceNum: Integer)
-case class NTupleArg(rel: String, mapping: List[(Integer,Integer)])
+case class IndexAncestor(index: Integer, ancestor: Integer)
+case class NTupleArg(rel: String, mapping: List[IndexAncestor])
 
 object PropParser extends RegexParsers {
   override val whiteSpace = "[ \t]+".r
@@ -27,10 +28,10 @@ object PropParser extends RegexParsers {
     case ranges~"-"~rel => NTupleArg(rel,ranges)
   }
   // Lists of ranges are strung together when we have null elements inserted into the parse
-  def ranges: Parser[List[(Integer,Integer)]] = ("[^0-9]".r.? ~> range).+
+  def ranges: Parser[List[IndexAncestor]] = ("[^0-9]".r.? ~> range).+
   // First number is start word, second number is how many steps up the tree to take before you take the whole lot
-  def range: Parser[(Integer,Integer)] = "[0-9]+:[0-9]+".r ^^ {
+  def range: Parser[IndexAncestor] = "[0-9]+:[0-9]+".r ^^ {
     s =>
-      (Integer.parseInt(s.split(":")(0)),Integer.parseInt(s.split(":")(1)))
+      IndexAncestor(Integer.parseInt(s.split(":")(0)),Integer.parseInt(s.split(":")(1)))
   }
 }
