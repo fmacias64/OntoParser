@@ -22,7 +22,7 @@ object Main {
 
   def main(args: Array[String]) {
 
-    val mongoClient = MongoClient("localhost", 27017)
+    val mongoClient = MongoClient("grapevine.stanford.edu", 27017)
     val sembank = mongoClient("sembank")
     val docbank = sembank("documents")
 
@@ -35,7 +35,6 @@ object Main {
 
     val path = "/Users/keenon/Desktop/ontonotes/data/english/annotations"
     val filePrefixes = FileUtils.recursivelyListFilePrefixes(path,List("prop","parse"))
-    //OntoParser.insert(filePrefixes(0),docbank)
     filePrefixes.foreach(OntoParser.insert(_,docbank))
 
     mongoClient.close()
