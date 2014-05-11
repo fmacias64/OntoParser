@@ -34,7 +34,7 @@ abstract class SequenceParser {
 
         // Move the position appropriately when we come to a string
 
-        child.toString().split("[ \n]").foreach(cursor.consumeToken)
+        child.toString().split("[ \n]").filter(s => s.trim.length > 0).foreach(cursor.consumeToken)
 
         corefs
       }
