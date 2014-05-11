@@ -1,14 +1,11 @@
-import scala.xml.XML
+import scala.xml.Elem
 
-case class CorefMention(sentence: Integer, index: Integer, id: Integer, corefType: String)
+case class CorefData(id: String, refType: String) extends TagData
 
 /**
  * Created by Keenon on 5/10/14.
  */
-object CorefParser {
-  def parse(path : String) : List[CorefMention] = {
-    val ner = XML.loadFile(path)
-    ner.child(1).child.foreach(n => println("Node: "+n))
-    List()
-  }
+object CorefParser extends SequenceParser[CorefData] {
+  override def dataLabel: String = "COREF"
+  override def getData(node: Elem): CorefData = CorefData((node \ "@ID").toString,(node \ "@TYPE").toString)
 }

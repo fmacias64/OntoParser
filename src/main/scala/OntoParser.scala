@@ -22,7 +22,15 @@ object OntoParser {
       val trees : List[PTBNode] = PTBParser.parseAll(PTBParser.trees,parseSr).get
       val propSr = StreamReader(new InputStreamReader(new FileInputStream(propFile)))
       val props : List[NTuple] = PropParser.parseAll(PropParser.props,propSr).get
-      val corefChains : List[CorefMention] = CorefParser.parse(path+".coref")
+      val corefChains : List[TagSequence[CorefData]] = CorefParser.parse(path+".coref")
+      val names : List[TagSequence[NameData]] = NameParser.parse(path+".name")
+
+      println("CorefChains: "+corefChains.length)
+      println(corefChains(0))
+      println(corefChains(1))
+
+      println("Names: "+names.length)
+      println(names(0))
 
       // Print out all the props
 
